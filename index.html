@@ -271,10 +271,10 @@
 </header>
 
 <nav class="tabs">
-  <button class="tab-btn active" data-page="entry" data-i18n="tabEntry">تسجيل دخول/خروج</button>
-  <button class="tab-btn" data-page="checklist" data-i18n="tabChecklist">تشيك الشحن والماء</button>
-  <button class="tab-btn" data-page="safety" data-i18n="tabSafety">الفحص اليومي للسلامة</button>
-  <button class="tab-btn" data-page="fuel" data-i18n="tabFuel">تعبئة الديزل</button>
+  <button class="tab-btn active" data-page="safety" data-i18n="tabSafety">الفحص اليومي للسلامة</button>
+  <button class="tab-btn" data-page="entry" data-i18n="tabEntry">تسجيل دخول/خروج <span class="lock">🔒</span></button>
+  <button class="tab-btn" data-page="checklist" data-i18n="tabChecklist">تشيك الشحن والماء <span class="lock">🔒</span></button>
+  <button class="tab-btn" data-page="fuel" data-i18n="tabFuel">تعبئة الديزل <span class="lock">🔒</span></button>
   <button class="tab-btn" data-page="log" data-i18n="tabLog">السجل <span class="lock">🔒</span></button>
   <button class="tab-btn" data-page="dashboard" data-i18n="tabDashboard">الإحصائيات <span class="lock">🔒</span></button>
   <button class="tab-btn" data-page="settings" data-i18n="tabSettings">الإعدادات <span class="lock">🔒</span></button>
@@ -283,7 +283,7 @@
 <main>
 
   <!-- ENTRY / EXIT PAGE -->
-  <section class="page active" id="page-entry">
+  <section class="page" id="page-entry">
     <div class="card">
       <h2 data-i18n="newEntryTitle">تسجيل دخول معدة للصيانة</h2>
       <div class="grid">
@@ -492,7 +492,7 @@
   </section>
 
   <!-- DAILY SAFETY CHECKLIST PAGE -->
-  <section class="page" id="page-safety">
+  <section class="page active" id="page-safety">
     <div class="card">
       <h2 data-i18n="safetyFormTitle">قائمة التحقق التشغيلية اليومية للرافعة الشوكية</h2>
       <div class="grid">
@@ -506,7 +506,7 @@
         </div>
         <div class="field">
           <label data-i18n="safetyDriver">اسم السائق (الموقّع)</label>
-          <select id="safetyDriver"></select>
+          <input type="text" id="safetyDriver" placeholder="اكتب اسم السائق">
         </div>
       </div>
       <h3 data-i18n="safetyItemsTitle">بنود الفحص</h3>
@@ -629,6 +629,14 @@
       <div class="field">
         <input type="text" id="pinInput" maxlength="10">
       </div>
+      <p class="muted" data-i18n="adminPinHint">هذا الرمز يفتح: السجل، الإحصائيات، الإعدادات</p>
+    </div>
+    <div class="card">
+      <h2 data-i18n="staffPinTitle">الرمز السري لموظفي الورشة</h2>
+      <div class="field">
+        <input type="text" id="staffPinInput" maxlength="10">
+      </div>
+      <p class="muted" data-i18n="staffPinHint">هذا الرمز يفتح: تسجيل دخول/خروج، تشيك الشحن والماء، تعبئة الديزل. الفحص اليومي للسلامة يبقى مفتوحًا للجميع بدون رمز.</p>
     </div>
     <button class="btn" id="saveSettingsBtn" data-i18n="saveSettingsBtn">حفظ كل الإعدادات</button>
   </section>
@@ -638,7 +646,7 @@
 
 <div class="modal-overlay" id="pinModal">
   <div class="modal-box">
-    <h3 data-i18n="enterPinTitle">أدخل الرمز السري</h3>
+    <h3 id="pinModalTitle" data-i18n="enterPinTitle">أدخل الرمز السري</h3>
     <div class="field">
       <input type="password" id="pinAttempt" inputmode="numeric">
     </div>
@@ -734,7 +742,10 @@ const I18N = {
     correctiveActionLabel: "الإجراء المتخذ", checkedByLabel: "تم فحصها بواسطة",
     safetyTaskCol: "وصف المهام", safetyResultCol: "النتائج/الملاحظات",
     safetySignatureLabel: "التوقيع (السائق)",
-    hasSafetyLbl: "فحص السلامة اليومي", safetyItemsSettingsTitle: "بنود الفحص اليومي للسلامة"
+    hasSafetyLbl: "فحص السلامة اليومي", safetyItemsSettingsTitle: "بنود الفحص اليومي للسلامة",
+    enterStaffPinTitle: "أدخل رمز موظفي الورشة", staffPinTitle: "الرمز السري لموظفي الورشة",
+    adminPinHint: "هذا الرمز يفتح: السجل، الإحصائيات، الإعدادات",
+    staffPinHint: "هذا الرمز يفتح: تسجيل دخول/خروج، تشيك الشحن والماء، تعبئة الديزل. الفحص اليومي للسلامة يبقى مفتوحًا للجميع بدون رمز."
   },
   en: {
     companyNameAr: "شركة الأيادي الفضية الحديثة",
@@ -797,7 +808,10 @@ const I18N = {
     correctiveActionLabel: "Corrective action taken", checkedByLabel: "Checked by",
     safetyTaskCol: "Task description", safetyResultCol: "Results/notes",
     safetySignatureLabel: "Signature (driver)",
-    hasSafetyLbl: "Daily safety check", safetyItemsSettingsTitle: "Daily safety checklist items"
+    hasSafetyLbl: "Daily safety check", safetyItemsSettingsTitle: "Daily safety checklist items",
+    enterStaffPinTitle: "Enter workshop staff PIN", staffPinTitle: "Workshop staff PIN",
+    adminPinHint: "This PIN unlocks: Log, Dashboard, Settings",
+    staffPinHint: "This PIN unlocks: Entry/Exit, Battery & water check, Diesel fueling. The Daily Safety Checklist stays open to everyone without a PIN."
   },
   ur: {
     companyNameAr: "شركة الأيادي الفضية الحديثة",
@@ -860,7 +874,10 @@ const I18N = {
     correctiveActionLabel: "کی گئی اصلاحی کارروائی", checkedByLabel: "معائنہ کرنے والا",
     safetyTaskCol: "کام کی تفصیل", safetyResultCol: "نتائج/نوٹس",
     safetySignatureLabel: "دستخط (ڈرائیور)",
-    hasSafetyLbl: "روزانہ حفاظتی معائنہ", safetyItemsSettingsTitle: "روزانہ حفاظتی معائنہ کے بند"
+    hasSafetyLbl: "روزانہ حفاظتی معائنہ", safetyItemsSettingsTitle: "روزانہ حفاظتی معائنہ کے بند",
+    enterStaffPinTitle: "ورکشاپ اسٹاف پن درج کریں", staffPinTitle: "ورکشاپ اسٹاف پن کوڈ",
+    adminPinHint: "یہ پن کھولتا ہے: ریکارڈ، ڈیش بورڈ، ترتیبات",
+    staffPinHint: "یہ پن کھولتا ہے: اندراج/اخراج، بیٹری اور پانی چیک، ڈیزل بھرائی۔ روزانہ حفاظتی معائنہ سب کے لیے بغیر پن کے کھلا رہتا ہے۔"
   }
 };
 let currentLang = "ar";
@@ -868,6 +885,7 @@ let currentLang = "ar";
 /* ================= STATE ================= */
 let settings = {
   pin: "789654",
+  staffPin: "1122",
   employees: ["موظف 1","موظف 2","موظف 3","موظف 4","موظف 5"],
   equipmentTypes: [
     {id:"fh12", ar:"شاحنة ديزل - FH12", en:"Diesel Truck - FH12", checklist:false, fuel:true, safety:false},
@@ -974,12 +992,18 @@ function showToast(msg){
 }
 
 /* ================= TAB NAVIGATION ================= */
-const LOCKED_PAGES = ["log","dashboard","settings"];
+const ADMIN_PAGES = ["log","dashboard","settings"];
+const STAFF_PAGES = ["entry","checklist","fuel"];
+let isStaff = false;
 document.querySelectorAll(".tab-btn").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     const page = btn.getAttribute("data-page");
-    if(LOCKED_PAGES.includes(page) && !isAdmin){
-      openPinModal(()=>goToPage(page));
+    if(ADMIN_PAGES.includes(page) && !isAdmin){
+      openPinModal("admin", ()=>goToPage(page));
+      return;
+    }
+    if(STAFF_PAGES.includes(page) && !isAdmin && !isStaff){
+      openPinModal("staff", ()=>goToPage(page));
       return;
     }
     goToPage(page);
@@ -998,8 +1022,11 @@ function goToPage(page){
 
 /* ================= PIN MODAL ================= */
 let pinCallback = null;
-function openPinModal(cb){
+let pinMode = "admin"; // "admin" or "staff"
+function openPinModal(mode, cb){
+  pinMode = mode || "admin";
   pinCallback = cb;
+  document.getElementById("pinModalTitle").textContent = pinMode==="staff" ? tr("enterStaffPinTitle") : tr("enterPinTitle");
   document.getElementById("pinAttempt").value = "";
   document.getElementById("pinModal").classList.add("show");
   setTimeout(()=>document.getElementById("pinAttempt").focus(), 50);
@@ -1009,8 +1036,15 @@ document.getElementById("pinCancelBtn").addEventListener("click", ()=>{
 });
 document.getElementById("pinConfirmBtn").addEventListener("click", ()=>{
   const val = document.getElementById("pinAttempt").value.trim();
+  if(pinMode==="staff" && val === String(settings.staffPin)){
+    isStaff = true;
+    document.getElementById("pinModal").classList.remove("show");
+    if(pinCallback) pinCallback();
+    return;
+  }
   if(val === String(settings.pin)){
     isAdmin = true;
+    isStaff = true; // admin access implies staff access too
     document.getElementById("adminToggle").classList.add("active");
     document.getElementById("adminToggle").textContent = tr("adminLogout");
     document.getElementById("pinModal").classList.remove("show");
@@ -1022,11 +1056,12 @@ document.getElementById("pinConfirmBtn").addEventListener("click", ()=>{
 document.getElementById("adminToggle").addEventListener("click", ()=>{
   if(isAdmin){
     isAdmin = false;
+    isStaff = false;
     document.getElementById("adminToggle").classList.remove("active");
     document.getElementById("adminToggle").textContent = tr("adminLogin");
-    goToPage("entry");
+    goToPage("safety");
   } else {
-    openPinModal(()=>{});
+    openPinModal("admin", ()=>{});
   }
 });
 document.getElementById("langToggle").addEventListener("click", ()=>{
@@ -1082,12 +1117,10 @@ function renderEmployeeSelects(){
   const logTech = document.getElementById("logFilterTech");
   const checkPerson = document.getElementById("checkPerson");
   const fuelPerson = document.getElementById("fuelPerson");
-  const safetyDriver = document.getElementById("safetyDriver");
-  const prevEntry = entryTech.value, prevLog = logTech.value, prevCheck = checkPerson.value, prevFuel = fuelPerson.value, prevDriver = safetyDriver.value;
+  const prevEntry = entryTech.value, prevLog = logTech.value, prevCheck = checkPerson.value, prevFuel = fuelPerson.value;
   entryTech.innerHTML = "";
   checkPerson.innerHTML = "";
   fuelPerson.innerHTML = "";
-  safetyDriver.innerHTML = "";
   const keepFirst = logTech.querySelector("option");
   logTech.innerHTML = "";
   logTech.appendChild(keepFirst);
@@ -1100,11 +1133,9 @@ function renderEmployeeSelects(){
     checkPerson.appendChild(o3);
     const o4 = document.createElement("option"); o4.value = name; o4.textContent = name;
     fuelPerson.appendChild(o4);
-    const o5 = document.createElement("option"); o5.value = name; o5.textContent = name;
-    safetyDriver.appendChild(o5);
   });
   const restore = (sel, val)=>{ if([...sel.options].some(o=>o.value===val)) sel.value = val; };
-  restore(entryTech, prevEntry); restore(logTech, prevLog); restore(checkPerson, prevCheck); restore(fuelPerson, prevFuel); restore(safetyDriver, prevDriver);
+  restore(entryTech, prevEntry); restore(logTech, prevLog); restore(checkPerson, prevCheck); restore(fuelPerson, prevFuel);
 }
 function renderIssuesChecklist(){
   const wrap = document.getElementById("entryIssuesList");
@@ -1604,7 +1635,7 @@ function renderSafetyItemsForm(){
 document.getElementById("submitSafetyBtn").addEventListener("click", async ()=>{
   const equipTypeId = document.getElementById("safetyEquipType").value;
   const unitId = document.getElementById("safetyUnitId").value.trim();
-  const driver = document.getElementById("safetyDriver").value;
+  const driver = document.getElementById("safetyDriver").value.trim();
   if(!equipTypeId || !unitId || !driver){
     showToast(tr("toastFillFields"));
     return;
@@ -1631,6 +1662,7 @@ document.getElementById("submitSafetyBtn").addEventListener("click", async ()=>{
     setSyncStatus(true);
     showToast(tr("toastCheckSaved"));
     document.getElementById("safetyUnitId").value = "";
+    document.getElementById("safetyDriver").value = "";
     renderSafetyItemsForm();
   }catch(e){ setSyncStatus(false); }
 });
@@ -1698,6 +1730,7 @@ function renderSettingsPage(){
   renderIssuesSettings();
   renderSafetyItemsSettings();
   document.getElementById("pinInput").value = settings.pin;
+  document.getElementById("staffPinInput").value = settings.staffPin;
 }
 function renderEmployeesSettings(){
   const wrap = document.getElementById("employeesList");
@@ -1791,6 +1824,7 @@ if(addSafetyItemBtn) addSafetyItemBtn.addEventListener("click", ()=>{
 });
 document.getElementById("saveSettingsBtn").addEventListener("click", async ()=>{
   settings.pin = document.getElementById("pinInput").value.trim() || settings.pin;
+  settings.staffPin = document.getElementById("staffPinInput").value.trim() || settings.staffPin;
   try{
     await fbPut("settings", settings);
     setSyncStatus(true);
