@@ -508,29 +508,53 @@
           <label data-i18n="safetyDriver">اسم السائق (الموقّع)</label>
           <input type="text" id="safetyDriver" placeholder="اكتب اسم السائق">
         </div>
+        <div class="field">
+          <label data-i18n="safetyFingerprint">رقم البصمة</label>
+          <input type="text" id="safetyFingerprint" placeholder="رقم بصمة الموظف">
+        </div>
       </div>
       <h3 data-i18n="safetyItemsTitle">بنود الفحص</h3>
       <div id="safetyItemsList"></div>
       <button class="btn" id="submitSafetyBtn" data-i18n="submitSafetyBtn">تسجيل الفحص</button>
     </div>
 
-    <div class="card print-target" id="safetyPreviewCard">
-      <h2 data-i18n="safetyHistoryTitle">عرض / طباعة فحص سابق</h2>
-      <div class="filter-bar no-print">
+    <div class="card no-print">
+      <h2 data-i18n="safetyDailyReportTitle">التقرير اليومي - كل المعدات</h2>
+      <div class="filter-bar">
         <div class="field">
-          <label data-i18n="unitId">رقم المعدة</label>
-          <input type="text" id="safetySearchUnit" placeholder="مثال: EFG220-01">
+          <label data-i18n="reportDateLabel">التاريخ</label>
+          <input type="text" id="safetyReportDate" class="datepick" placeholder="YYYY-MM-DD">
         </div>
         <div class="field">
-          <label data-i18n="reportDateLabel">التاريخ (اختياري - الأحدث افتراضيًا)</label>
-          <input type="text" id="safetySearchDate" class="datepick" placeholder="YYYY-MM-DD">
+          <label data-i18n="safetyOptionalUnitFilter">رقم المعدة (اختياري)</label>
+          <input type="text" id="safetyReportUnit" placeholder="اتركه فاضي لعرض الكل">
         </div>
-        <button class="btn secondary small" id="safetySearchBtn" data-i18n="applyFilter">تطبيق</button>
+        <button class="btn secondary small" id="safetyReportBtn" data-i18n="applyFilter">تطبيق</button>
+        <button class="btn secondary small" id="safetyClearDateBtn" data-i18n="safetyClearDateBtn">مسح التاريخ (بحث بكل الأيام)</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th data-i18n="colUnit">الرقم</th>
+            <th data-i18n="safetyEquipType">الطراز</th>
+            <th data-i18n="safetyDriver">السائق</th>
+            <th data-i18n="colDate">التاريخ</th>
+            <th data-i18n="colEntry">الوقت</th>
+            <th data-i18n="safetyOverallStatus">الحالة العامة</th>
+            <th data-i18n="colAction">إجراء</th>
+          </tr></thead>
+          <tbody id="safetyDailyReportBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="safetyDailyReportEmpty" data-i18n="noChecksThatDay" style="display:none;">لا يوجد تشيك مسجل بهذا التاريخ</div>
+    </div>
+
+    <div class="card print-target" id="safetyPreviewCard" style="display:none;">
+      <h2 data-i18n="safetyHistoryTitle">تفاصيل الفحص</h2>
+      <div class="row-actions no-print" style="margin-bottom:12px;">
         <button class="btn secondary small" id="printSafetyBtn" data-i18n="printReport">طباعة تقرير</button>
       </div>
-      <div id="safetyPreviewBody">
-        <div class="empty-state" id="safetyPreviewEmpty" data-i18n="enterUnitFirst">أدخل رقم المعدة لعرض السجل</div>
-      </div>
+      <div id="safetyPreviewBody"></div>
     </div>
   </section>
 
@@ -745,7 +769,11 @@ const I18N = {
     hasSafetyLbl: "فحص السلامة اليومي", safetyItemsSettingsTitle: "بنود الفحص اليومي للسلامة",
     enterStaffPinTitle: "أدخل رمز موظفي الورشة", staffPinTitle: "الرمز السري لموظفي الورشة",
     adminPinHint: "هذا الرمز يفتح: السجل، الإحصائيات، الإعدادات",
-    staffPinHint: "هذا الرمز يفتح: تسجيل دخول/خروج، تشيك الشحن والماء، تعبئة الديزل. الفحص اليومي للسلامة يبقى مفتوحًا للجميع بدون رمز."
+    staffPinHint: "هذا الرمز يفتح: تسجيل دخول/خروج، تشيك الشحن والماء، تعبئة الديزل. الفحص اليومي للسلامة يبقى مفتوحًا للجميع بدون رمز.",
+    safetyFingerprint: "رقم البصمة", safetyDailyReportTitle: "التقرير اليومي - كل المعدات",
+    safetyOptionalUnitFilter: "رقم المعدة (اختياري)", safetyClearDateBtn: "مسح التاريخ (بحث بكل الأيام)",
+    safetyOverallStatus: "الحالة العامة", safetyIncomplete: "غير مكتمل",
+    safetyAllOk: "كل البنود سليمة", safetyViewBtn: "عرض / طباعة"
   },
   en: {
     companyNameAr: "شركة الأيادي الفضية الحديثة",
@@ -811,7 +839,11 @@ const I18N = {
     hasSafetyLbl: "Daily safety check", safetyItemsSettingsTitle: "Daily safety checklist items",
     enterStaffPinTitle: "Enter workshop staff PIN", staffPinTitle: "Workshop staff PIN",
     adminPinHint: "This PIN unlocks: Log, Dashboard, Settings",
-    staffPinHint: "This PIN unlocks: Entry/Exit, Battery & water check, Diesel fueling. The Daily Safety Checklist stays open to everyone without a PIN."
+    staffPinHint: "This PIN unlocks: Entry/Exit, Battery & water check, Diesel fueling. The Daily Safety Checklist stays open to everyone without a PIN.",
+    safetyFingerprint: "Fingerprint ID", safetyDailyReportTitle: "Daily report - all equipment",
+    safetyOptionalUnitFilter: "Unit ID (optional)", safetyClearDateBtn: "Clear date (search all days)",
+    safetyOverallStatus: "Overall status", safetyIncomplete: "Incomplete",
+    safetyAllOk: "All items OK", safetyViewBtn: "View / print"
   },
   ur: {
     companyNameAr: "شركة الأيادي الفضية الحديثة",
@@ -877,7 +909,11 @@ const I18N = {
     hasSafetyLbl: "روزانہ حفاظتی معائنہ", safetyItemsSettingsTitle: "روزانہ حفاظتی معائنہ کے بند",
     enterStaffPinTitle: "ورکشاپ اسٹاف پن درج کریں", staffPinTitle: "ورکشاپ اسٹاف پن کوڈ",
     adminPinHint: "یہ پن کھولتا ہے: ریکارڈ، ڈیش بورڈ، ترتیبات",
-    staffPinHint: "یہ پن کھولتا ہے: اندراج/اخراج، بیٹری اور پانی چیک، ڈیزل بھرائی۔ روزانہ حفاظتی معائنہ سب کے لیے بغیر پن کے کھلا رہتا ہے۔"
+    staffPinHint: "یہ پن کھولتا ہے: اندراج/اخراج، بیٹری اور پانی چیک، ڈیزل بھرائی۔ روزانہ حفاظتی معائنہ سب کے لیے بغیر پن کے کھلا رہتا ہے۔",
+    safetyFingerprint: "فنگر پرنٹ نمبر", safetyDailyReportTitle: "روزانہ رپورٹ - تمام معدات",
+    safetyOptionalUnitFilter: "یونٹ نمبر (اختیاری)", safetyClearDateBtn: "تاریخ صاف کریں (تمام دنوں میں تلاش کریں)",
+    safetyOverallStatus: "مجموعی حالت", safetyIncomplete: "نامکمل",
+    safetyAllOk: "تمام بند ٹھیک ہیں", safetyViewBtn: "دیکھیں / پرنٹ کریں"
   }
 };
 let currentLang = "ar";
@@ -979,7 +1015,7 @@ function applyLanguage(){
   renderDailyCheckReport();
   renderFuelReport();
   renderSafetyItemsForm();
-  renderSafetyPreview();
+  renderSafetyDailyReport();
   updateCheckPersonLabel();
 }
 
@@ -1186,7 +1222,19 @@ function daysBetween(iso){
   return Math.floor((d2 - d1) / (1000*60*60*24));
 }
 function todayStr(){
-  return new Date().toISOString().slice(0,10);
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function toLocalDateStr(iso){
+  if(!iso) return "";
+  const d = new Date(iso);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
 }
 
 /* ================= ENTRY FORM SUBMIT ================= */
@@ -1279,8 +1327,8 @@ function renderLog(){
   const equipFilter = document.getElementById("logFilterEquip").value;
 
   let list = Object.entries(entries);
-  if(from) list = list.filter(([k,e])=> e.entryDateTime.slice(0,10) >= from);
-  if(to) list = list.filter(([k,e])=> e.entryDateTime.slice(0,10) <= to);
+  if(from) list = list.filter(([k,e])=> toLocalDateStr(e.entryDateTime) >= from);
+  if(to) list = list.filter(([k,e])=> toLocalDateStr(e.entryDateTime) <= to);
   if(techFilter) list = list.filter(([k,e])=> e.technician === techFilter);
   if(equipFilter) list = list.filter(([k,e])=> e.equipTypeId === equipFilter);
   list.sort((a,b)=> new Date(b[1].entryDateTime) - new Date(a[1].entryDateTime));
@@ -1332,8 +1380,8 @@ document.getElementById("printReportBtn").addEventListener("click", ()=>{ setPri
 function renderDashboard(){
   const list = Object.values(entries);
   const today = todayStr();
-  const entriesToday = list.filter(e=>e.entryDateTime.slice(0,10)===today).length;
-  const exitsToday = list.filter(e=>e.exitDateTime && e.exitDateTime.slice(0,10)===today).length;
+  const entriesToday = list.filter(e=>toLocalDateStr(e.entryDateTime)===today).length;
+  const exitsToday = list.filter(e=>e.exitDateTime && toLocalDateStr(e.exitDateTime)===today).length;
   const currentlyIn = list.filter(e=>e.status==="in").length;
   const totalAll = list.length;
   const elA = document.getElementById("statEntriesToday");
@@ -1466,7 +1514,7 @@ function renderDailyCheckReport(){
   if(!body) return;
   const date = document.getElementById("checkReportDate").value.trim() || todayStr();
   body.innerHTML = "";
-  const dayChecks = Object.values(checklists).filter(c=>c.dateTime.slice(0,10)===date);
+  const dayChecks = Object.values(checklists).filter(c=>toLocalDateStr(c.dateTime)===date);
   const units = [...new Set(dayChecks.map(c=>c.unitId))].sort();
   document.getElementById("dailyReportEmpty").style.display = units.length ? "none" : "block";
   units.forEach(unitId=>{
@@ -1526,8 +1574,8 @@ function renderFuelReport(){
   const from = document.getElementById("fuelFrom").value.trim();
   const to = document.getElementById("fuelTo").value.trim();
   let list = Object.values(fuelLogs);
-  if(from) list = list.filter(l=> l.dateTime.slice(0,10) >= from);
-  if(to) list = list.filter(l=> l.dateTime.slice(0,10) <= to);
+  if(from) list = list.filter(l=> toLocalDateStr(l.dateTime) >= from);
+  if(to) list = list.filter(l=> toLocalDateStr(l.dateTime) <= to);
   list.sort((a,b)=> new Date(b.dateTime)-new Date(a.dateTime));
 
   document.getElementById("fuelEmpty").style.display = list.length ? "none" : "block";
@@ -1560,7 +1608,8 @@ function renderFuelReport(){
   const now = new Date();
   const day = now.getDay(); // 0=Sun
   const monday = new Date(now); monday.setDate(now.getDate() - ((day+6)%7));
-  document.getElementById("fuelFrom").value = monday.toISOString().slice(0,10);
+  const my = monday.getFullYear(), mm = String(monday.getMonth()+1).padStart(2,"0"), md = String(monday.getDate()).padStart(2,"0");
+  document.getElementById("fuelFrom").value = `${my}-${mm}-${md}`;
   document.getElementById("fuelTo").value = todayStr();
 })();
 
@@ -1636,10 +1685,14 @@ document.getElementById("submitSafetyBtn").addEventListener("click", async ()=>{
   const equipTypeId = document.getElementById("safetyEquipType").value;
   const unitId = document.getElementById("safetyUnitId").value.trim();
   const driver = document.getElementById("safetyDriver").value.trim();
+  const fingerprint = document.getElementById("safetyFingerprint").value.trim();
   if(!equipTypeId || !unitId || !driver){
     showToast(tr("toastFillFields"));
     return;
   }
+  // NOTE: items are saved as-is even if some are left unanswered (result:"") -
+  // not every item applies to every equipment type (e.g. fuel level doesn't apply
+  // to electric forklifts), so we never block saving on incomplete items.
   const rows = Array.from(document.querySelectorAll("#safetyItemsList .safety-item-row"));
   const items = rows.map(row=>({
     id: row.getAttribute("data-id"),
@@ -1647,12 +1700,8 @@ document.getElementById("submitSafetyBtn").addEventListener("click", async ()=>{
     correctiveAction: row.querySelector(".safety-action")?.value.trim() || "",
     checkedBy: row.querySelector(".safety-checkedby")?.value || ""
   }));
-  if(items.some(i=>!i.result)){
-    showToast(tr("toastFillFields"));
-    return;
-  }
   const record = {
-    equipTypeId, unitId, unitIdLower: unitId.toLowerCase(), driver,
+    equipTypeId, unitId, unitIdLower: unitId.toLowerCase(), driver, fingerprint,
     date: todayStr(), items, dateTime: new Date().toISOString()
   };
   try{
@@ -1663,34 +1712,66 @@ document.getElementById("submitSafetyBtn").addEventListener("click", async ()=>{
     showToast(tr("toastCheckSaved"));
     document.getElementById("safetyUnitId").value = "";
     document.getElementById("safetyDriver").value = "";
+    document.getElementById("safetyFingerprint").value = "";
     renderSafetyItemsForm();
+    renderSafetyDailyReport();
   }catch(e){ setSyncStatus(false); }
 });
 
-document.getElementById("safetySearchBtn").addEventListener("click", renderSafetyPreview);
-document.getElementById("safetySearchUnit").addEventListener("input", renderSafetyPreview);
-function renderSafetyPreview(){
-  const unitId = document.getElementById("safetySearchUnit").value.trim().toLowerCase();
-  const dateFilter = document.getElementById("safetySearchDate").value.trim();
-  const body = document.getElementById("safetyPreviewBody");
-  const emptyHtml = `<div class="empty-state" id="safetyPreviewEmpty">${tr("enterUnitFirst")}</div>`;
-  if(!unitId){
-    body.innerHTML = emptyHtml;
-    return;
-  }
-  let list = Object.values(safetyChecklists).filter(r=>r.unitIdLower===unitId);
-  if(dateFilter) list = list.filter(r=>r.date===dateFilter);
+// ---- Daily report: lists every safety check for a given date (default today), optionally filtered by unit ----
+document.getElementById("safetyReportDate").value = todayStr();
+document.getElementById("safetyReportBtn").addEventListener("click", renderSafetyDailyReport);
+document.getElementById("safetyClearDateBtn").addEventListener("click", ()=>{
+  document.getElementById("safetyReportDate").value = "";
+  renderSafetyDailyReport();
+});
+function safetyRecordStatus(record){
+  const failed = (record.items||[]).filter(i=>i.result==="not_approved").length;
+  const unanswered = (record.items||[]).filter(i=>!i.result).length;
+  return {failed, unanswered};
+}
+function renderSafetyDailyReport(){
+  const body = document.getElementById("safetyDailyReportBody");
+  if(!body) return;
+  const date = document.getElementById("safetyReportDate").value.trim();
+  const unitFilter = document.getElementById("safetyReportUnit").value.trim().toLowerCase();
+  let list = Object.values(safetyChecklists);
+  if(date) list = list.filter(r=>r.date===date);
+  if(unitFilter) list = list.filter(r=>r.unitIdLower===unitFilter);
   list.sort((a,b)=> new Date(b.dateTime)-new Date(a.dateTime));
-  const record = list[0];
-  if(!record){
-    body.innerHTML = emptyHtml;
-    return;
-  }
+  document.getElementById("safetyDailyReportEmpty").style.display = list.length ? "none" : "block";
+  body.innerHTML = "";
+  list.forEach(record=>{
+    const {failed, unanswered} = safetyRecordStatus(record);
+    let statusHtml;
+    if(failed>0) statusHtml = `<span class="badge overdue">⚠ ${tr("notApprovedOption")} (${failed})</span>`;
+    else if(unanswered>0) statusHtml = `<span class="badge in">${tr("safetyIncomplete")} (${unanswered})</span>`;
+    else statusHtml = `<span class="badge out">✔ ${tr("safetyAllOk")}</span>`;
+    const tr_ = document.createElement("tr");
+    tr_.innerHTML = `
+      <td>${record.unitId}</td>
+      <td>${equipLabelById(record.equipTypeId)}</td>
+      <td>${record.driver}</td>
+      <td>${record.date}</td>
+      <td>${fmtDateTime(record.dateTime)}</td>
+      <td>${statusHtml}</td>
+      <td><button class="btn small secondary" data-key="${record.key}">${tr("safetyViewBtn")}</button></td>
+    `;
+    tr_.querySelector("button").addEventListener("click", ()=>showSafetyDetail(record));
+    body.appendChild(tr_);
+  });
+}
+
+// ---- Detail / print view for one specific record ----
+function showSafetyDetail(record){
+  const card = document.getElementById("safetyPreviewCard");
+  const body = document.getElementById("safetyPreviewBody");
+  card.style.display = "block";
   const rowsHtml = record.items.map((it,idx)=>`
     <tr>
       <td style="text-align:center;">${idx+1}</td>
       <td>${safetyItemLabel(it.id)}</td>
-      <td style="text-align:center;">${it.result==="approved" ? "✔ "+tr("approvedOption") : "✘ "+tr("notApprovedOption")}</td>
+      <td style="text-align:center;">${it.result==="approved" ? "✔ "+tr("approvedOption") : it.result==="not_approved" ? "✘ "+tr("notApprovedOption") : "-"}</td>
       <td>${it.correctiveAction || "-"}</td>
       <td>${it.checkedBy || "-"}</td>
     </tr>
@@ -1700,6 +1781,7 @@ function renderSafetyPreview(){
       <div><strong data-i18n="unitId">رقم المعدة</strong>: ${record.unitId}</div>
       <div><strong data-i18n="safetyEquipType">الطراز</strong>: ${equipLabelById(record.equipTypeId)}</div>
       <div><strong data-i18n="reportDateLabel">التاريخ</strong>: ${record.date}</div>
+      <div><strong data-i18n="safetyFingerprint">رقم البصمة</strong>: ${record.fingerprint || "-"}</div>
     </div>
     <div class="table-wrap">
       <table>
@@ -1716,6 +1798,7 @@ function renderSafetyPreview(){
     <p style="margin-top:16px;"><strong data-i18n="safetySignatureLabel">التوقيع (السائق)</strong>: ${record.driver}</p>
   `;
   body.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent = tr(el.getAttribute("data-i18n")); });
+  card.scrollIntoView({behavior:"smooth", block:"start"});
 }
 document.getElementById("printSafetyBtn").addEventListener("click", ()=>{
   setPrintMeta("safetyFormTitle");
@@ -1858,7 +1941,7 @@ function pollUpdates(){
   fbGet("entries").then(r=>{ entries = r || {}; renderCurrentlyIn(); renderDashboard(); renderLog(); setSyncStatus(true); }).catch(()=>setSyncStatus(false));
   fbGet("checklists").then(r=>{ checklists = r || {}; renderCheckHistory(); renderDailyCheckReport(); }).catch(()=>{});
   fbGet("fuelLogs").then(r=>{ fuelLogs = r || {}; renderFuelReport(); }).catch(()=>{});
-  fbGet("safetyChecklists").then(r=>{ safetyChecklists = r || {}; renderSafetyPreview(); }).catch(()=>{});
+  fbGet("safetyChecklists").then(r=>{ safetyChecklists = r || {}; renderSafetyDailyReport(); }).catch(()=>{});
   const onSettingsPage = document.getElementById("page-settings").classList.contains("active");
   if(onSettingsPage) return; // never pull remote settings while admin is actively editing them - avoids wiping unsaved rows
   fbGet("settings").then(r=>{
