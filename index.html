@@ -202,6 +202,15 @@
   .login-error{color:var(--danger);font-size:12.5px;margin-top:8px;text-align:center;}
   .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
   @media(max-width:760px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:520px){
+    .filter-bar .btn, .row-actions .btn{flex:1 1 auto;}
+    .login-card{margin-top:6px;}
+    .login-box{padding:16px;}
+    .settings-row{gap:8px;}
+    main{padding:14px 10px 50px;}
+    .card{padding:14px;}
+    table{font-size:12.5px;}
+  }
   .stat-card{
     background:var(--white);
     border:1px solid var(--silver-200);
@@ -215,11 +224,13 @@
   .modal-overlay{
     position:fixed;inset:0;background:rgba(14,35,64,.45);
     display:none;align-items:center;justify-content:center;z-index:50;padding:16px;
+    overflow-y:auto;
   }
   .modal-overlay.show{display:flex;}
   .modal-box{
     background:var(--white);border-radius:12px;padding:22px;max-width:400px;width:100%;
     box-shadow:0 10px 40px rgba(0,0,0,.2);
+    margin:auto;max-height:calc(100vh - 32px);overflow-y:auto;
   }
   .modal-box h3{margin-top:0;}
   .toggle-group{display:flex;gap:8px;margin-bottom:12px;}
@@ -260,6 +271,7 @@
     @page{ margin: 14mm 12mm; }
   }
   body.print-scoped .card:not(.print-target){display:none !important;}
+  body.print-scoped .stat-grid, body.print-scoped canvas{display:none !important;}
   .print-header{display:none;}
   @media print{
     .print-header{
@@ -467,6 +479,7 @@
               <th data-i18n="colEntry">دخول</th>
               <th data-i18n="colExit">خروج</th>
               <th data-i18n="colStatus">الحالة</th>
+              <th class="no-print" data-i18n="repairPhotoLabel">صورة إثبات الإصلاح</th>
               <th class="no-print" data-i18n="colAction">إجراء</th>
             </tr>
           </thead>
@@ -527,6 +540,7 @@
     </div>
     <div class="card print-target" id="employeeReportCard">
       <h2 data-i18n="employeeReportTitle">تقرير الموظفين الشهري</h2>
+      <div class="print-only-line" id="employeeReportMonthLine"></div>
       <div class="filter-bar">
         <div class="field">
           <label data-i18n="selectMonthLabel">الشهر</label>
@@ -605,7 +619,7 @@
       <div class="table-wrap">
         <table>
           <thead><tr>
-            <th data-i18n="colDate">التاريخ</th><th data-i18n="colSession">الجلسة</th>
+            <th data-i18n="colDate">التاريخ</th><th data-i18n="colUnit">الرقم</th><th data-i18n="colSession">الجلسة</th>
             <th data-i18n="colPerson">الشخص</th><th data-i18n="colBattery">البطارية</th>
             <th data-i18n="colBatteryPercent">النسبة %</th>
             <th data-i18n="colWater">الماء</th><th data-i18n="colNotesShort">ملاحظات</th>
@@ -858,6 +872,12 @@
       <button class="btn secondary small" id="addUnitBtn" data-i18n="addRow">+ إضافة</button>
     </div>
     <div class="card">
+      <h2 data-i18n="driverLicensesTitle">رخص القيادة</h2>
+      <p class="muted" data-i18n="driverLicensesHint">سجل كل سائق يوصل معدة أو مركبة (حتى لو ما له حساب دخول بالنظام) مع رقم بصمته وتاريخ انتهاء رخصته</p>
+      <div id="driverLicensesListSettings"></div>
+      <button class="btn secondary small" id="addDriverLicenseBtn" data-i18n="addRow">+ إضافة</button>
+    </div>
+    <div class="card">
       <h2 data-i18n="issuesTitle">قائمة الأعطال/الأعمال</h2>
       <div id="issuesListSettings"></div>
       <button class="btn secondary small" id="addIssueBtn" data-i18n="addRow">+ إضافة</button>
@@ -918,6 +938,14 @@
     <div class="field">
       <label data-i18n="exitNoteLabel">ملاحظات ختامية (اختياري)</label>
       <textarea id="exitNoteInput"></textarea>
+    </div>
+    <div class="field">
+      <label data-i18n="repairPhotoLabel">صورة إثبات الإصلاح (اختياري)</label>
+      <input type="file" id="exitPhotoInput" accept="image/*" capture="environment">
+      <div id="exitPhotoPreviewWrap" style="display:none;margin-top:8px;">
+        <img id="exitPhotoPreview" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid var(--silver-200);">
+        <button type="button" class="btn secondary small" id="exitPhotoRemoveBtn" data-i18n="removePhotoBtn" style="margin-inline-start:8px;">إزالة الصورة</button>
+      </div>
     </div>
     <div class="row-actions">
       <button class="btn success" id="exitConfirmBtn" data-i18n="confirmExitBtn">تأكيد الخروج</button>
@@ -1041,6 +1069,9 @@ const I18N = {
     toastNoPrintPermission: "ما عندك صلاحية الطباعة، تواصل مع المشرف",
     checklistHint: "فعّل \"تشيك ليست\" فقط للمعدات الكهربائية اللي تحتاج متابعة شحن/ماء",
     unitsTitle: "أرقام المعدات", unitsHint: "أضف رقم كل معدة مرتبط بنوعها، عشان يقدر الموظف يختارها من قائمة جاهزة أو يبحث فيها بدل ما يكتبها يدويًا كل مرة",
+    driverLicensesTitle: "رخص القيادة",
+    driverLicensesHint: "سجل كل سائق يوصل معدة أو مركبة (حتى لو ما له حساب دخول بالنظام) مع رقم بصمته وتاريخ انتهاء رخصته",
+    driverNamePh: "اسم السائق", fingerprintNoPh: "رقم البصمة",
     reportRestrictedMsg: "🔒 التقرير اليومي والتفاصيل متاحة فقط لموظفي الورشة والمشرف",
     textCustomTitle: "تخصيص نصوص الموقع",
     textCustomHint: "ما عجبتك كلمة أو تسمية بالموقع؟ ابحث عنها هنا وعدّلها بأي لغة تبي - التعديل ينطبق بكل مكان تظهر فيه نفس الكلمة",
@@ -1164,6 +1195,9 @@ const I18N = {
     toastNoPrintPermission: "You don't have print permission, contact the supervisor",
     checklistHint: "Enable \"checklist\" only for electric equipment needing charge/water tracking",
     unitsTitle: "Equipment Unit Numbers", unitsHint: "Add each unit number linked to its type, so employees can pick it from a ready list or search it instead of typing it manually every time",
+    driverLicensesTitle: "Driving Licenses",
+    driverLicensesHint: "Register every driver who operates equipment or a vehicle (even without a system login) with their fingerprint number and license expiry date",
+    driverNamePh: "Driver name", fingerprintNoPh: "Fingerprint number",
     reportRestrictedMsg: "🔒 The daily report and details are only available to workshop staff and the supervisor",
     textCustomTitle: "Customize site text",
     textCustomHint: "Don't like a word or label on the site? Search for it here and edit it in any language - the change applies everywhere that text appears",
@@ -1287,6 +1321,9 @@ const I18N = {
     toastNoPrintPermission: "آپ کے پاس پرنٹ کرنے کی اجازت نہیں، سپروائزر سے رابطہ کریں",
     checklistHint: "\"چیک لسٹ\" صرف ان الیکٹرک معدات کے لیے فعال کریں جن کو چارج/پانی کی نگرانی درکار ہو",
     unitsTitle: "معدات کے یونٹ نمبر", unitsHint: "ہر یونٹ نمبر کو اس کی قسم سے منسلک کر کے شامل کریں، تاکہ ملازم اسے تیار فہرست سے منتخب کر سکے یا تلاش کر سکے ہر بار خود لکھنے کے بجائے",
+    driverLicensesTitle: "ڈرائیونگ لائسنس",
+    driverLicensesHint: "ہر ڈرائیور کو رجسٹر کریں جو معدہ یا گاڑی چلاتا ہے (چاہے اس کا سسٹم لاگ ان نہ ہو) اس کے فنگر پرنٹ نمبر اور لائسنس کی میعاد ختم ہونے کی تاریخ کے ساتھ",
+    driverNamePh: "ڈرائیور کا نام", fingerprintNoPh: "فنگر پرنٹ نمبر",
     reportRestrictedMsg: "🔒 روزانہ رپورٹ اور تفصیلات صرف ورکشاپ اسٹاف اور سپروائزر کے لیے دستیاب ہیں",
     textCustomTitle: "سائٹ کی تحریر تبدیل کریں",
     textCustomHint: "سائٹ پر کوئی لفظ یا عنوان پسند نہیں؟ اسے یہاں تلاش کریں اور کسی بھی زبان میں تبدیل کریں - تبدیلی ہر جگہ لاگو ہوگی جہاں وہ تحریر ظاہر ہوتی ہے",
@@ -1363,6 +1400,7 @@ let settings = {
   pin: "789654",
   staffPin: "1122",
   employeeAccounts: {}, // {employeeName: {pin, pages: []}} - individual login + granular page permissions, managed from Settings
+  driverLicenses: [], // {id, driverName, fingerprintNo, licenseExpiry} - independent of the app-login employee list, since not every driver needs system access
   employees: ["موظف 1","موظف 2","موظف 3","موظف 4","موظف 5"],
   equipmentTypes: [
     {id:"fh12", ar:"شاحنة ديزل - FH12", en:"Diesel Truck - FH12", checklist:false, fuel:true, safety:false},
@@ -1961,13 +1999,31 @@ function renderCurrentlyIn(){
     body.appendChild(tr_);
   });
 }
+let pendingExitPhoto = null;
 function openExitModal(key){
   pendingExitKey = key;
+  pendingExitPhoto = null;
   const e = entries[key];
   document.getElementById("exitModalUnitLabel").textContent = `${equipLabelById(e.equipTypeId)} - ${e.unitId}`;
   document.getElementById("exitNoteInput").value = "";
+  document.getElementById("exitPhotoInput").value = "";
+  document.getElementById("exitPhotoPreviewWrap").style.display = "none";
   document.getElementById("exitModal").classList.add("show");
 }
+document.getElementById("exitPhotoInput").addEventListener("change", async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    pendingExitPhoto = await compressImageFile(file);
+    document.getElementById("exitPhotoPreview").src = pendingExitPhoto;
+    document.getElementById("exitPhotoPreviewWrap").style.display = "block";
+  }catch(err){ showToast(tr("toastFillFields")); }
+});
+document.getElementById("exitPhotoRemoveBtn").addEventListener("click", ()=>{
+  pendingExitPhoto = null;
+  document.getElementById("exitPhotoInput").value = "";
+  document.getElementById("exitPhotoPreviewWrap").style.display = "none";
+});
 document.getElementById("exitCancelBtn").addEventListener("click", ()=>{
   document.getElementById("exitModal").classList.remove("show");
 });
@@ -1975,9 +2031,14 @@ document.getElementById("exitConfirmBtn").addEventListener("click", async ()=>{
   if(!pendingExitKey) return;
   const note = document.getElementById("exitNoteInput").value.trim();
   const update = {status:"out", exitDateTime: new Date().toISOString(), exitNote: note};
+  if(pendingExitPhoto) update.hasExitPhoto = true;
   try{
     await fbPatch(`entries/${pendingExitKey}`, update);
     Object.assign(entries[pendingExitKey], update);
+    if(pendingExitPhoto){
+      try{ await fbPut(`entryPhotos/${pendingExitKey}`, pendingExitPhoto); }
+      catch(e){ /* record already saved; photo upload failing shouldn't block the flow */ }
+    }
     setSyncStatus(true);
     showToast(tr("toastExitSaved"));
     document.getElementById("exitModal").classList.remove("show");
@@ -2022,8 +2083,11 @@ function renderLog(){
       <td>${fmtDateTime(e.entryDateTime)}</td>
       <td>${e.exitDateTime ? fmtDateTime(e.exitDateTime) : "-"}</td>
       <td><span class="badge ${e.status==="in"?"in":"out"}">${e.status==="in" ? "🟡" : "🟢"} ${e.status}</span></td>
+      <td class="no-print">${e.hasExitPhoto ? `<button class="btn small secondary" data-act="photo">📷 ${tr("viewPhotoBtn")}</button>` : "-"}</td>
       <td class="no-print row-actions">${isAdmin ? `<button class="btn small secondary" data-act="edit">${tr("editBtn")}</button><button class="btn small danger" data-act="delete">${tr("deleteBtn")}</button>` : "-"}</td>
     `;
+    const photoBtn = tr_.querySelector('[data-act="photo"]');
+    if(photoBtn) photoBtn.addEventListener("click", ()=>openPhotoModal(key, "entryPhotos"));
     if(isAdmin){
       tr_.querySelector('[data-act="edit"]').addEventListener("click", ()=>openEditModal("entry", key));
       tr_.querySelector('[data-act="delete"]').addEventListener("click", ()=>deleteRecord("entry", key));
@@ -2200,18 +2264,16 @@ function renderExpiryAlerts(){
   body.innerHTML = "";
   const rows = [];
   (settings.units||[]).forEach(u=>{
-    [["licenseExpiry", tr("docLicense")], ["insuranceExpiry", tr("docInsurance")]].forEach(([field, label])=>{
-      const dateStr = u[field];
-      if(!dateStr) return;
-      const d = daysUntil(dateStr);
-      if(d <= EXPIRY_ALERT_DAYS) rows.push({typeCol: equipLabelById(u.equipTypeId), idCol: u.unitId, label, dateStr, days:d});
-    });
-  });
-  Object.entries(settings.employeeAccounts||{}).forEach(([name, acc])=>{
-    const dateStr = acc.driverLicenseExpiry;
+    const dateStr = u.insuranceExpiry;
     if(!dateStr) return;
     const d = daysUntil(dateStr);
-    if(d <= EXPIRY_ALERT_DAYS) rows.push({typeCol: tr("docDriverLicense"), idCol: name, label: tr("docDriverLicense"), dateStr, days:d});
+    if(d <= EXPIRY_ALERT_DAYS) rows.push({typeCol: equipLabelById(u.equipTypeId), idCol: u.unitId, label: tr("docInsurance"), dateStr, days:d});
+  });
+  (settings.driverLicenses||[]).forEach(dl=>{
+    const dateStr = dl.licenseExpiry;
+    if(!dateStr || !dl.driverName) return;
+    const d = daysUntil(dateStr);
+    if(d <= EXPIRY_ALERT_DAYS) rows.push({typeCol: tr("docDriverLicense"), idCol: `${dl.driverName} (${dl.fingerprintNo||"-"})`, label: tr("docDriverLicense"), dateStr, days:d});
   });
   rows.sort((a,b)=> a.days - b.days);
   document.getElementById("expiryAlertEmpty").style.display = rows.length ? "none" : "block";
@@ -2244,6 +2306,18 @@ function renderEmployeeReport(){
   const body = document.getElementById("employeeReportBody");
   if(!body) return;
   const month = document.getElementById("employeeReportMonth").value; // "YYYY-MM"
+  const monthLine = document.getElementById("employeeReportMonthLine");
+  if(monthLine){
+    if(month){
+      const [y, m] = month.split("-");
+      const d = new Date(Number(y), Number(m)-1, 1);
+      const locale = currentLang==="ar" ? "ar-EG-u-nu-latn" : currentLang==="ur" ? "ur-PK-u-nu-latn" : "en-GB";
+      const monthLabel = d.toLocaleDateString(locale, {month:"long", year:"numeric"});
+      monthLine.textContent = `${tr("selectMonthLabel")}: ${monthLabel}`;
+    } else {
+      monthLine.textContent = "";
+    }
+  }
   const inMonth = (iso)=> !!iso && iso.slice(0,7) === month;
   const stats = {};
   settings.employees.forEach(name=>{ stats[name] = {entries:0, checks:0, fuel:0, issues:0}; });
@@ -2349,6 +2423,7 @@ function renderCheckHistory(){
     const tr_ = document.createElement("tr");
     tr_.innerHTML = `
       <td>${fmtDateTime(c.dateTime)}</td>
+      <td>${c.unitId||"-"}</td>
       <td>${c.session==="morning" ? tr("morningCheck") : tr("eveningCheck")}</td>
       <td>${c.person}</td>
       <td>${c.batteryCharged ? "✔" : "✘"}</td>
@@ -2908,6 +2983,7 @@ async function openResolveModal(recordKey, itemIndex, record){
     sel.appendChild(o);
   });
   if(currentEmployee && [...sel.options].some(o=>o.value===currentEmployee.name)) sel.value = currentEmployee.name;
+  sel.disabled = !!currentEmployee && !isAdmin;
   document.getElementById("resolveModal").classList.add("show");
   // claim the issue immediately so it drops off other staff members' lists
   if(currentEmployee && !isAdmin){
@@ -3188,7 +3264,7 @@ async function deleteRecord(type, key){
   const pathMap = {entry:"entries", checklist:"checklists", fuel:"fuelLogs", safety:"safetyChecklists"};
   try{
     await fbDelete(`${pathMap[type]}/${key}`);
-    if(type==="entry") delete entries[key];
+    if(type==="entry"){ delete entries[key]; fbDelete(`entryPhotos/${key}`).catch(()=>{}); }
     if(type==="checklist") delete checklists[key];
     if(type==="fuel"){ delete fuelLogs[key]; fbDelete(`fuelPhotos/${key}`).catch(()=>{}); }
     if(type==="safety") delete safetyChecklists[key];
@@ -3206,6 +3282,7 @@ function renderSettingsPage(){
   renderEmployeesSettings();
   renderEquipTypesSettings();
   renderUnitsSettings();
+  renderDriverLicensesSettings();
   renderIssuesSettings();
   renderSafetyItemsSettings();
   renderTextCustomResults();
@@ -3282,18 +3359,12 @@ function renderEmployeesSettings(){
         <input type="text" value="${account.pin||''}" data-field="pin" placeholder="${tr('employeePinPh')}" style="max-width:120px;">
         <button class="btn small danger" data-act="del">✕</button>
       </div>
-      <div style="display:flex;gap:6px;align-items:center;margin-top:6px;max-width:280px;">
-        <label style="font-size:11px;white-space:nowrap;" data-i18n="driverLicenseExpiryLabel"></label>
-        <input type="text" class="datepick" placeholder="YYYY-MM-DD" value="${account.driverLicenseExpiry||''}" data-field="driverLicenseExpiry">
-        <span data-badge="driverLicense">${expiryBadgeHtml(account.driverLicenseExpiry)}</span>
-      </div>
       <p class="muted" style="margin:4px 0;font-size:11.5px;" data-i18n="employeePagesLabel"></p>
       <div class="checkbox-list" style="margin-top:2px;">${checksHtml}
         <label class="checkbox-chip ${account.canPrint?'checked':''}"><input type="checkbox" data-print="1" ${account.canPrint?"checked":""}> <span data-i18n="canPrintLabel"></span></label>
       </div>
     `;
     row.querySelector('[data-i18n="employeePagesLabel"]').textContent = tr("employeePagesLabel");
-    row.querySelector('[data-i18n="driverLicenseExpiryLabel"]').textContent = tr("driverLicenseExpiryLabel");
     row.querySelector('[data-i18n="canPrintLabel"]').textContent = tr("canPrintLabel");
     row.querySelector('[data-print="1"]').addEventListener("change", e=>{
       const acc = settings.employeeAccounts[settings.employees[idx]];
@@ -3311,11 +3382,6 @@ function renderEmployeesSettings(){
     });
     row.querySelector('[data-field="pin"]').addEventListener("input", e=>{
       settings.employeeAccounts[settings.employees[idx]].pin = e.target.value.trim();
-    });
-    row.querySelector('[data-field="driverLicenseExpiry"]').addEventListener("input", e=>{
-      const acc = settings.employeeAccounts[settings.employees[idx]];
-      acc.driverLicenseExpiry = e.target.value.trim();
-      row.querySelector('[data-badge="driverLicense"]').innerHTML = expiryBadgeHtml(acc.driverLicenseExpiry);
     });
     row.querySelectorAll('[data-page]').forEach(chk=>{
       chk.addEventListener("change", e=>{
@@ -3393,31 +3459,17 @@ function renderUnitsSettings(){
         <input type="text" value="${u.unitId||''}" placeholder="مثال: 318/LD" data-field="unitId">
         <button class="btn small danger">✕</button>
       </div>
-      <div class="grid" style="margin-top:6px;">
-        <div class="field" style="margin-bottom:0;">
-          <label style="font-size:11px;" data-i18n="licenseExpiryLabel"></label>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <input type="text" class="datepick" placeholder="YYYY-MM-DD" value="${u.licenseExpiry||''}" data-field="licenseExpiry">
-            <span data-badge="license">${expiryBadgeHtml(u.licenseExpiry)}</span>
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:0;">
-          <label style="font-size:11px;" data-i18n="insuranceExpiryLabel"></label>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <input type="text" class="datepick" placeholder="YYYY-MM-DD" value="${u.insuranceExpiry||''}" data-field="insuranceExpiry">
-            <span data-badge="insurance">${expiryBadgeHtml(u.insuranceExpiry)}</span>
-          </div>
+      <div class="field" style="margin-top:6px;margin-bottom:0;max-width:280px;">
+        <label style="font-size:11px;" data-i18n="insuranceExpiryLabel"></label>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="text" class="datepick" placeholder="YYYY-MM-DD" value="${u.insuranceExpiry||''}" data-field="insuranceExpiry">
+          <span data-badge="insurance">${expiryBadgeHtml(u.insuranceExpiry)}</span>
         </div>
       </div>
     `;
-    row.querySelector('[data-i18n="licenseExpiryLabel"]').textContent = tr("licenseExpiryLabel");
     row.querySelector('[data-i18n="insuranceExpiryLabel"]').textContent = tr("insuranceExpiryLabel");
     row.querySelector('[data-field="equipTypeId"]').addEventListener("change", e=>{ u.equipTypeId = e.target.value; });
     row.querySelector('[data-field="unitId"]').addEventListener("input", e=>{ u.unitId = e.target.value; });
-    row.querySelector('[data-field="licenseExpiry"]').addEventListener("input", e=>{
-      u.licenseExpiry = e.target.value.trim();
-      row.querySelector('[data-badge="license"]').innerHTML = expiryBadgeHtml(u.licenseExpiry);
-    });
     row.querySelector('[data-field="insuranceExpiry"]').addEventListener("input", e=>{
       u.insuranceExpiry = e.target.value.trim();
       row.querySelector('[data-badge="insurance"]').innerHTML = expiryBadgeHtml(u.insuranceExpiry);
@@ -3426,6 +3478,44 @@ function renderUnitsSettings(){
     wrap.appendChild(row);
   });
 }
+function renderDriverLicensesSettings(){
+  const wrap = document.getElementById("driverLicensesListSettings");
+  if(!wrap) return;
+  wrap.innerHTML = "";
+  settings.driverLicenses = settings.driverLicenses || [];
+  settings.driverLicenses.forEach((d, idx)=>{
+    const row = document.createElement("div");
+    row.style.cssText = "padding:10px;margin-bottom:10px;background:var(--silver-100);border-radius:8px;";
+    row.innerHTML = `
+      <div class="settings-row">
+        <input type="text" value="${d.driverName||''}" placeholder="${tr('driverNamePh')}" data-field="driverName">
+        <input type="text" value="${d.fingerprintNo||''}" placeholder="${tr('fingerprintNoPh')}" data-field="fingerprintNo" style="max-width:140px;">
+        <button class="btn small danger">✕</button>
+      </div>
+      <div class="field" style="margin-top:6px;margin-bottom:0;max-width:280px;">
+        <label style="font-size:11px;" data-i18n="licenseExpiryLabel"></label>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="text" class="datepick" placeholder="YYYY-MM-DD" value="${d.licenseExpiry||''}" data-field="licenseExpiry">
+          <span data-badge="dlicense">${expiryBadgeHtml(d.licenseExpiry)}</span>
+        </div>
+      </div>
+    `;
+    row.querySelector('[data-i18n="licenseExpiryLabel"]').textContent = tr("licenseExpiryLabel");
+    row.querySelector('[data-field="driverName"]').addEventListener("input", e=>{ d.driverName = e.target.value; });
+    row.querySelector('[data-field="fingerprintNo"]').addEventListener("input", e=>{ d.fingerprintNo = e.target.value; });
+    row.querySelector('[data-field="licenseExpiry"]').addEventListener("input", e=>{
+      d.licenseExpiry = e.target.value.trim();
+      row.querySelector('[data-badge="dlicense"]').innerHTML = expiryBadgeHtml(d.licenseExpiry);
+    });
+    row.querySelector("button.danger").addEventListener("click", ()=>{ settings.driverLicenses.splice(idx,1); renderDriverLicensesSettings(); });
+    wrap.appendChild(row);
+  });
+}
+document.getElementById("addDriverLicenseBtn").addEventListener("click", ()=>{
+  settings.driverLicenses = settings.driverLicenses || [];
+  settings.driverLicenses.push({id:"dl"+Date.now(), driverName:"", fingerprintNo:"", licenseExpiry:""});
+  renderDriverLicensesSettings();
+});
 document.getElementById("addUnitBtn").addEventListener("click", ()=>{
   settings.units = settings.units || [];
   settings.units.push({id:"unit"+Date.now(), equipTypeId: settings.equipmentTypes[0]?.id || "", unitId:"", licenseExpiry:"", insuranceExpiry:""});
